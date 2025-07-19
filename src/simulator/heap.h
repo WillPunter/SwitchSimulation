@@ -22,9 +22,15 @@ typedef enum comparison comparison_t;
 /*  Define heap comparator and free function types. The generic nature of the
     heap means that functions for comparing elements (to enforce prioriy) and
     freeing the memory of said custom elements must be provided. */
-typedef comparison_t (*comparator_func)(void *, void *);
+typedef comparison_t (*comparator_func_t)(void *, void *);
+typedef void (*free_func_t)(void *);
 
-/*  Heap API. */
-heap_t heap_init();
+/*  Heap API provides functions for creating a heap, */
+heap_t heap_create(comparator_func_t, free_func_t);
+void heap_free(heap_t heap);
+void heap_insert(heap_t, void *);
+void *heap_min(heap_t);
+void *heap_pop_min(heap_t);
+unsigned int heap_size(); 
 
 #endif
