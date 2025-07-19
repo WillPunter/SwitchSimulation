@@ -42,6 +42,20 @@ heap_t heap_create(comparator_func_t comparator, free_func_t free_elem) {
     return new_heap;
 };
 
+/*  Free a heap - freeing a heap involves first calling the free_elem routine
+    provided at creation (in the heap_create function) on all of the elements,
+    then freeing the heap structure itself.*/
+void heap_free(heap_t heap) {
+    assert(heap);
+
+    int i;
+    for (i = 0; i < heap->size; i++) {
+        heap->free_elem(heap->elems[i]);
+    }
+
+    free((void *) heap);
+}
+
 void heap_insert(heap_t, void *);
 void *heap_min(heap_t);
 void *heap_pop_min(heap_t);
