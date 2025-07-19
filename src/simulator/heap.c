@@ -17,9 +17,9 @@ struct heap {
 };
 
 /*  Forward declare helper functions. */
-static inline unsigned int heap_get_parent_index(unsigned int index);
-static inline unsigned int heap_get_left_child_index(unsigned int index);
-static inline unsigned int heap_get_right_child_index(unsigned int index);
+static inline unsigned int parent_index(unsigned int index);
+static inline unsigned int left_child_index(unsigned int index);
+static inline unsigned int right_child_index(unsigned int index);
 
 /*  Heap API implementation. */
 
@@ -85,10 +85,21 @@ void heap_insert(heap_t heap, void *elem) {
     heap->size += 1;
 
     unsigned int index = heap->size - 1;
-    unsigned int parent_index;
-    //while (index != 0 && heap->comparator(heap->elems[index]), ) {
+    unsigned int parent = parent_index(index);
+    
+    while (
+        index != 0 &&
+        heap->comparator(heap->elems[index], heap->elems[parent]) == LT
+    ) {
+        /*  Swap parent and child elements. */
+        void *temp = heap->elems[index];
+        heap->elems[index] = heap->elems[parent];
+        heap->elems[parent] = temp;
 
-    //}
+        /*  Update indices. */
+        index = parent;
+        parent = get_parent_index(index);
+    }
 };
 
 void *heap_min(heap_t);
@@ -210,14 +221,14 @@ unsigned int heap_size();
     So if i = x - 1, then x = i + 1 and then i has children j = 2x - 1 or j = 2x
     so j = 2(i + 1) - 1 = 2i + 1 or j = 2(i + 1) = 2i + 2.
     So when 0-indexed, i has children j = 2i + 1 and 2i + 2. */
-static inline unsigned int heap_get_parent_index(unsigned int index) {
+static inline unsigned int parent_index(unsigned int index) {
     return index / 2;
 };
 
-static inline unsigned int heap_get_left_child_index(unsigned int index) {
+static inline unsigned int left_child_index(unsigned int index) {
     return 2 * index + 1;
 }
 
-static inline unsigned int heap_get_right_child_index(unsigned int index) {
+static inline unsigned int right_child_index(unsigned int index) {
     return 2 * index + 2;
 }
