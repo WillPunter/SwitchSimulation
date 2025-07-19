@@ -20,6 +20,16 @@ struct heap {
 static inline unsigned int parent_index(unsigned int index);
 static inline unsigned int left_child_index(unsigned int index);
 static inline unsigned int right_child_index(unsigned int index);
+static char has_child(heap_t heap, unsigned int index);
+static unsigned int largest_child_greater_than(
+    heap_t heap,
+    unsigned int index
+);
+static void swap_elem(
+    heap_t heap,
+    unsigned int index_1,
+    unsigned int index_2
+);
 
 /*  Heap API implementation. */
 
@@ -92,9 +102,7 @@ void heap_insert(heap_t heap, void *elem) {
         heap->comparator(heap->elems[index], heap->elems[parent]) == LT
     ) {
         /*  Swap parent and child elements. */
-        void *temp = heap->elems[index];
-        heap->elems[index] = heap->elems[parent];
-        heap->elems[parent] = temp;
+        swap_elem(heap, index, parent);
 
         /*  Update indices. */
         index = parent;
@@ -109,7 +117,32 @@ void *heap_min(heap_t heap) {
     return heap->elems[0];
 };
 
-void *heap_pop_min(heap_t);
+/*  Pop elements from heap - popping the minimum elements from a heap simply
+    works by swapping the last element in the array into the place of the
+    first and then bubbling it down, by swapping it with the larger child
+    node until it is smaller than both children. This, of course, all assumes
+    that the number of elements is greater than zero. */
+void *heap_pop_min(heap_t heap) {
+    assert(heap->size > 0);
+    void *min = heap->elems[0];
+
+    /*  Swap last and first elements and bubble down. */
+    heap->elems[0] = heap->elems[heap->size - 1];
+    heap->size -= 1;
+
+    unsigned int index = 0;
+    unsigned int child_index;
+
+    while (
+        has_child(heap, index) &&
+        (child_index = largest_child_less_than(heap, index))
+    ) {
+        swap_elem(heap, index, child_index);
+    }
+
+    return min;
+};
+
 unsigned int heap_size();
 
 /*  Helper function implementations. */
@@ -237,4 +270,83 @@ static inline unsigned int left_child_index(unsigned int index) {
 
 static inline unsigned int right_child_index(unsigned int index) {
     return 2 * index + 2;
+}
+
+static char has_child(heap_t heap, unsigned int index) {
+    return left_child_index(index) < heap->size ||
+        right_child_index(index) < heap->size;
+}
+
+/*  Get the largest child node of the provided index for which the indexed node
+    is greater than said child. If the indexed node is smaller than both of its
+    children return 0, otherwise return the index of the largest child node
+    that the provided node is greater than (for use in bubbling down during the
+    heap pop function).*/
+static unsigned int largest_child_greater_than(
+    heap_t heap,
+    unsigned int index
+) {
+    unsigned int left_child;
+    unsigned int right_child;
+
+    if ((right_child = right_child_index(index)) < heap->size) {
+        /*  Node has two children by complete binary tree property of heap. */
+        left_child = left_child_index(index);
+
+        /*  Compare current and child elements. */
+        void *curr = heap->elems[index];
+        void *left = heap->elems[left_child];
+        void *right = heap->elems[right_child];
+
+        comparison_t curr_left = heap->comparator(curr, left);
+        comparison_t curr_right = heap->comparator(curr, right);
+        comparison_t left_right = heap->comparator(left, right);
+
+        if (curr_left == GT && curr_right == GT) {
+            /*  If curent > left and current > right then we want to return the
+                larger of the left and right children. */
+            return (left_right == GT) ? left_child : right_child; 
+        } else if (curr_left == GT) {
+            /* If current > left but not current > right then we only want to
+                swap with the left. */
+            return left_child;
+        } else if(curr_right == GT) {
+            /*  If current > right but not current > left then we only want to
+                swap with the right. */
+            return right_child;
+        } else {
+            /*  If current <= left and current <= right then current is in the
+                right place and we do not want to move it. */
+            return 0;
+        }
+    } else if ((left_child = left_child_index(index)) < heap->size) {
+        /*  Node has only left child. */
+        void *curr = heap->elems[index];
+        void *left = heap->elems[left_child];
+
+        comparison_t curr_left = heap->comparator(curr, left);
+        
+        if (curr_left == GT) {
+            /*  If current > left then we swap current and left. */
+            return left_child;
+        } else {
+            /*  If current <= left then current is in the right place. */
+            return 0;
+        }
+    }
+
+    /*  Node has no children. */
+
+    return 0;
+}
+
+/*  Swap elements in heap with given indices. */
+static void swap_elem(
+    heap_t heap,
+    unsigned int index_1,
+    unsigned int index_2
+) {
+    void *temp = heap->elems[index_1];
+    heap->elems[index_1] = heap->elems[index_2];
+    heap->elems[index_2] = temp;
 }
