@@ -102,7 +102,13 @@ void heap_insert(heap_t heap, void *elem) {
     }
 };
 
-void *heap_min(heap_t);
+/*  Get minimum element - simply return the element at the start of the array,
+    assuming of course the size is greater than zero. */
+void *heap_min(heap_t heap) {
+    assert(heap->size > 0);
+    return heap->elems[0];
+};
+
 void *heap_pop_min(heap_t);
 unsigned int heap_size();
 
