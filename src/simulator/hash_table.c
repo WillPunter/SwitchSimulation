@@ -250,4 +250,33 @@ void hash_table_insert(hash_table_t hash_table, void *key, void *value) {
     }
 };
 
-void hash_table_remove(hash_table_t hash_table, void *key);
+/*  Hash table remove - to remove an element from a hash table, simply look up
+    it's location by checking the entries that hash to the same location as the
+    provided key. Free the key and value structures first, then the entry
+    structure, fixing the linked list by modifying the previous element. */
+void hash_table_remove(hash_table_t hash_table, void *key) {
+    hash_t hash = hash_table->hash_func(key) % hash_table->capacity;
+
+    if (hash_table->entries[hash]) {
+        hash_table_entry_t curr = hash_table->entries[hash];
+        hash_table_entry_t *ptr = &hash_table->entries[hash];
+
+        while (curr) {
+            if (hash_table->key_compare(key, curr->key) == EQ) {
+                hash_table->free_key(curr->key);
+                hash_table->free_val(curr->val);
+
+                *ptr = curr->next;
+                free((void *) curr);
+
+                return;
+            }
+
+            if (curr->next) {
+                ptr = &curr->next;
+            }
+            
+            curr = curr->next;
+        }
+    }
+};
