@@ -15,6 +15,7 @@ typedef hash_t (*hash_func_t)(void *);
 /*  Hash table API. */
 hash_table_t hash_table_create(
     hash_func_t hash_func,
+    comparator_func_t key_compare,
     free_func_t free_key,
     free_func_t free_val
 );
