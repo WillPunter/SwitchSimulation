@@ -143,7 +143,11 @@ void *heap_pop_min(heap_t heap) {
     return min;
 };
 
-unsigned int heap_size();
+/*  Heap size - return heap size member. */
+unsigned int heap_size(heap_t heap) {
+    assert(heap);
+    return heap->size;
+};
 
 /*  Helper function implementations. */
 

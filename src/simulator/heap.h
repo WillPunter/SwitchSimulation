@@ -26,11 +26,11 @@ typedef comparison_t (*comparator_func_t)(void *, void *);
 typedef void (*free_func_t)(void *);
 
 /*  Heap API provides functions for creating a heap, */
-heap_t heap_create(comparator_func_t, free_func_t);
+heap_t heap_create(comparator_func_t comparator, free_func_t free_elem);
 void heap_free(heap_t heap);
-void heap_insert(heap_t, void *);
-void *heap_min(heap_t);
-void *heap_pop_min(heap_t);
-unsigned int heap_size(); 
+void heap_insert(heap_t heap, void *elem);
+void *heap_min(heap_t heap);
+void *heap_pop_min(heap_t heap);
+unsigned int heap_size(heap_t heap); 
 
 #endif
