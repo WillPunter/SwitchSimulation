@@ -42,6 +42,14 @@ void simulator_init(time_type_t time_type) {
     event_queue = heap_create(compare_event, free_event);
 };
 
+/*  Destroy the simulator - this involves freeing the event table and event
+    queue. */
+void simulator_destroy() {
+    event_table_free(event_table);
+
+    heap_free(event_queue);
+};
+
 /*  Register simulator event - this is simply a wrapper around the
     corresponding event table function. This is because the simulator module is
     the primary way that the user interfaces with the simulator and therefore
