@@ -33,8 +33,11 @@ struct double_time {
 
 typedef struct double_time *double_time_t;
 
+typedef void (*add_func_t)(void *, void *);
+
 static event_table_t event_table;
 static heap_t event_queue;
+static add_func_t add_time;
 static comparator_func_t compare_time;
 static free_func_t free_time;
 static void *current_time;
@@ -43,9 +46,11 @@ static void *current_time;
 static comparison_t compare_event(void *lhs, void *rhs);
 static void free_event(void *event);
 static uint_time_t create_uint_time(unsigned int time);
+static void add_uint_time(void *lhs, void *rhs);
 static comparison_t compare_uint_time(void *lhs, void *rhs);
 static void free_uint_time(void *uint_time);
 static double_time_t create_double_time(double time);
+static void add_double_time(void *lhs, void *rhs);
 static comparison_t compare_double_time(void *lhs, void *rhs);
 static void free_double_time(void *double_time);
 
@@ -59,30 +64,44 @@ static void free_double_time(void *double_time);
     custom_time_free must be non-NULL function pointers for valid comparison
     and memory freeing functions on the structure. If time_type is UINT_TIME or
     DOUBLE_TIME, i.e. one of the defaults, then NULL should be passed for the
-    time comparison and freeing functions. */
+    time comparison and freeing functions. The start time parameter should also
+    only be provided with a non-NULL value when CUSTOM_TIME is passed, and
+    should be the representation of the start time / zero time in the custom
+    representation. */
 void simulator_init(
     time_type_t time_type,
+    add_func_t custom_time_add,
     comparator_func_t custom_time_compare,
-    comparator_func_t custom_time_free
+    free_func_t custom_time_free,
+    void *start_time
 ) {
     event_table = event_table_create();
 
     switch (time_type) {
         case UINT_TIME: {
+            add_time = add_uint_time;
             compare_time = compare_uint_time;
             free_time = free_uint_time;
+            current_time = create_uint_time(0);
             break;
         };
 
         case DOUBLE_TIME: {
+            add_time = add_double_time;
             compare_time = compare_double_time;
             free_time = free_double_time;
+            current_time = create_double_time(0.0);
             break;
         };
 
         case CUSTOM_TIME: {
+            assert(custom_time_compare);
+            assert(custom_time_free);
+            assert(start_time);
+            add_time = custom_time_add;
             compare_time = custom_time_compare;
             free_time = custom_time_free;
+            current_time = start_time;
             break;
         };
     }
@@ -90,9 +109,9 @@ void simulator_init(
     event_queue = heap_create(compare_event, free_event);
 };
 
-/*  Destroy the simulator - this involves freeing the event table and event
+/*  Terminate the simulator - this involves freeing the event table and event
     queue. */
-void simulator_destroy() {
+void simulator_terminate() {
     event_table_free(event_table);
 
     heap_free(event_queue);
@@ -111,8 +130,27 @@ void simulator_register_event(
     event_table_register_event(event_table, evt_id, callback, free_func);
 };
 
-/*  Invoke event - this adds an event to the event queue at the given time.
-    This involves providing a time. */
+/*  Invoke event - this adds an event to the event queue at the given time in
+    the future. The event id specifies the event, and provides a key for lookup
+    in the event table. The arg parameter is the argument to be passed in. It
+    may be NULL. The future_time parameter specifies how far in the future the
+    event should occur, so that the event occurs at current_time +
+    future_time.
+    
+    An event structure is allocated to store the event invocation properties.
+    The event structure is deallocated when the event is dequeued or when the
+    simulation is terminated. */
+void simulator_invoke_event(event_id_t evt_id, void *arg, void *future_time) {
+    event_t event = (event_t) malloc(sizeof(struct event));
+    event->evt_id = evt_id;
+    event->arg = arg;
+    event->time = future_time;
+    add_time(current_time, event->time);
+
+    heap_insert(event_queue, (void *) event);
+};
+
+/*  Simulator main loop. */
 
 /*  Helper function implementations. */
 
@@ -164,6 +202,18 @@ static uint_time_t create_uint_time(unsigned int time) {
     return uint_time;
 };
 
+/*  Add uint time - this modifies the value of the rhs time to contain the
+    summation of the times of the lhs and rhs parameters. */
+static void add_uint_time(void *lhs, void *rhs) {
+    assert(lhs);
+    assert(rhs);
+
+    uint_time_t time_lhs = (uint_time_t) lhs;
+    uint_time_t time_rhs = (uint_time_t) rhs;
+
+    time_rhs->time += time_lhs->time;
+};
+
 /*  Compare uint time - this simply compares the unsigned integer
     representations for simulation time. */
 static comparison_t compare_uint_time(void *lhs, void *rhs) {
@@ -198,6 +248,18 @@ static double_time_t create_double_time(double time) {
     double_time->time = time;
 
     return double_time;
+};
+
+/*  Add double time - add the values of the provided times and store the result
+    in the right hand side element. */
+static void add_double_time(void *lhs, void *rhs) {
+    assert(lhs);
+    assert(rhs);
+
+    double_time_t time_lhs = (double_time_t) lhs;
+    double_time_t time_rhs = (double_time_t) rhs;
+
+    time_rhs->time += time_lhs->time;
 };
 
 /*  Compare double time - simply compares two double time structures by
