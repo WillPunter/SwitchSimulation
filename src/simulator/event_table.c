@@ -43,7 +43,13 @@ event_table_t event_table_create() {
     return event_table;
 };
 
-void event_table_free();
+/*  Free event table - this simply just involves freeing the underlying hash
+    table and then freeing the event table structure. */
+void event_table_free(event_table_t event_table) {
+    hash_table_free(event_table->hash_table);
+    free(event_table);
+};
+
 void event_table_register_event(
     event_id_t evt_id,
     callback_func_t callback,
