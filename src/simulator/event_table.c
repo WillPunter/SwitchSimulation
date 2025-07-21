@@ -73,6 +73,31 @@ void event_table_register_event(
     hash_table_insert(event_table->hash_table, (void *) key, (void *) val);
 };
 
+/*  Event table lookup - look a record up by event id and then obtain the
+    corresponding callback and free argument functions. */
+void event_table_lookup(
+    event_table_t event_table,
+    event_id_t evt_id,
+    callback_func_t *callback_out,
+    free_func_t *free_arg_out
+) {
+    /*  Create temporary key structure on the stack for looking up. */
+    struct event_entry_key lookup_key;
+    lookup_key.key = evt_id;
+
+    /*  Look up element with key in the stack. */
+    void *lookup_val = hash_table_lookup(event_table->hash_table, &lookup_key);
+
+    if (lookup_val) {
+        event_entry_val_t val = (event_entry_val_t) lookup_val;
+        *callback_out = val->callback;
+        *free_arg_out = val->free_arg;
+    } else {
+        *callback_out = 0;
+        *free_arg_out = 0;
+    }
+};
+
 /*  Helper function implementations / definitions. */
 static hash_t event_entry_hash(void *evt_key) {
     assert(evt_key);

@@ -20,9 +20,16 @@ typedef void (*callback_func_t)(void *);
 event_table_t event_table_create();
 void event_table_free(event_table_t event_table);
 void event_table_register_event(
+    event_table_t event_table,
     event_id_t evt_id,
     callback_func_t callback,
     free_func_t free_arg
+);
+void event_table_lookup(
+    event_table_t event_table,
+    event_id_t evt_id,
+    callback_func_t *callback_out,
+    free_func_t *free_arg_out
 );
 
 #endif
