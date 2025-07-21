@@ -44,17 +44,34 @@ event_table_t event_table_create() {
 };
 
 /*  Free event table - this simply just involves freeing the underlying hash
-    table and then freeing the event table structure. */
+    table and then freeing the event table structure. Note that the hash table
+    free functions invokes the free functions for the keys and values given
+    to the hash_table at creation time. */
 void event_table_free(event_table_t event_table) {
+    assert(event_table);
+    assert(event_table->hash_table);
+
     hash_table_free(event_table->hash_table);
     free(event_table);
 };
 
+/*  Register event - this adds a mapping from an event id to a callback and
+    argument freeing function. To do this, we need to first allocate an event
+    table key and value pair. */
 void event_table_register_event(
+    event_table_t event_table,
     event_id_t evt_id,
     callback_func_t callback,
     free_func_t free_arg
-);
+) {
+    event_entry_key_t key = malloc(sizeof(struct event_entry_key));
+    assert(key);
+
+    event_entry_val_t val = malloc(sizeof(struct event_entry_val));
+    assert(val);
+
+    hash_table_insert(event_table->hash_table, (void *) key, (void *) val);
+};
 
 /*  Helper function implementations / definitions. */
 static hash_t event_entry_hash(void *evt_key) {
