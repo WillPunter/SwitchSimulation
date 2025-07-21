@@ -25,6 +25,7 @@ static event_table_t event_table;
 static heap_t event_queue;
 static comparator_func_t compare_time;
 static free_func_t free_time;
+static void *current_time;
 
 /*  Forward declare helper functions. */
 static comparison_t compare_event(void *lhs, void *rhs);
@@ -39,7 +40,20 @@ void simulator_init(time_type_t time_type) {
     event_table = event_table_create();
 
     event_queue = heap_create(compare_event, free_event);
-}
+};
+
+/*  Register simulator event - this is simply a wrapper around the
+    corresponding event table function. This is because the simulator module is
+    the primary way that the user interfaces with the simulator and therefore
+    the event table is encapsulated. */
+void simulator_register_event(
+    event_id_t evt_id,
+    callback_func_t callback,
+    free_func_t free_func
+) {
+    assert(event_table);
+    event_table_register_event(event_table, evt_id, callback, free_func);
+};
 
 /*  Helper function implementations. */
 
@@ -54,7 +68,7 @@ static comparison_t compare_event(void *lhs, void *rhs) {
     event_t evt_rhs = (event_t) rhs;
 
     return time_comparator(evt_lhs->time, evt_rhs->time);
-}
+};
 
 /*  Free event - to free an event we first free its argument and time values
     and then free the event structure. */
@@ -81,4 +95,4 @@ static void free_event(void *evt_ptr) {
     free_time(evt->time);
 
     free(evt_ptr);
-}
+};
