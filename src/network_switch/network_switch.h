@@ -6,12 +6,14 @@
 #define SWITCH_H
 
 #include "./../data_structures/queue.h"
+#include "./../data_structures/heap.h"
 
 typedef int *(*schedule_func_t)(void *);
 
 struct network_switch {
     unsigned int num_ports;
     queue_t **voqs;
+    free_func_t free_packet;
 };
 
 typedef struct network_switch *network_switch_t;
