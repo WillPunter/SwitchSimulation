@@ -1,11 +1,11 @@
 CC := gcc
-INCLUDE := -I./../src/simulator
+INCLUDE := -I./../src/simulator -I./../src/data_structures
 
 clean:
 	# note: we use @echo, because just the normal echo command would show the
 	# echo command.
 	@echo Cleaning repository...
-	rm -f demo ./simulator/test_heap
+	rm -f demo ./data_structures/test_heap ./data_structures/test_hash_table
 
 demo:
 	@echo Building demo tests...
@@ -13,22 +13,22 @@ demo:
 
 heap:
 	@echo Building heap tests...
-	$(CC) ./simulator/test_heap.c ./../src/simulator/heap.c $(INCLUDE) -o ./simulator/test_heap
+	$(CC) ./data_structures/test_heap.c ./../src/data_structures/heap.c $(INCLUDE) -o ./data_structures/test_heap
 
 hash_table:
 	@echo Building hash table tests...
-	$(CC) ./simulator/test_hash_table.c ./../src/simulator/hash_table.c $(INCLUDE) -o ./simulator/test_hash_table
+	$(CC) ./data_structures/test_hash_table.c ./../src/data_structures/hash_table.c $(INCLUDE) -o ./data_structures/test_hash_table
 
 build: demo heap hash_table
 
 test: build
 	@echo Running all tests...
 	./demo
-	./simulator/test_heap
-	./simulator/test_hash_table
+	./data_structures/test_heap
+	./data_structures/test_hash_table
 
 check: build
 	@echo Running memory checks...
 	valgrind ./demo
-	valgrind ./simulator/test_heap
-	valgrind ./simulator/test_hash_table
+	valgrind ./data_structures/test_heap
+	valgrind ./data_structures/test_hash_table
