@@ -184,11 +184,105 @@ DEFINE_TEST(test_hash_table_remove_1)
     hash_table_free(hash_table);
 END_TEST
 
+DEFINE_TEST(test_hash_table_remove_2)
+    hash_table_t hash_table = hash_table_create(
+        elem_key_hash,
+        elem_key_compare,
+        elem_key_free,
+        elem_val_free
+    );
+
+    elem_key_t key_1 = elem_key_create(1);
+    elem_key_t key_2 = elem_key_create(2);
+    elem_key_t key_3 = elem_key_create(3);
+
+    elem_val_t val_1 = elem_val_create('A');
+    elem_val_t val_2 = elem_val_create('B');
+    elem_val_t val_3 = elem_val_create('C');
+
+    hash_table_insert(hash_table, (void *) key_1, (void *) val_1);
+    hash_table_insert(hash_table, (void *) key_2, (void *) val_2);
+    hash_table_insert(hash_table, (void *) key_3, (void *) val_3);
+
+    elem_val_t val_lookup = hash_table_lookup(hash_table, key_1);
+    ASSERT_TRUE(val_lookup)
+    ASSERT_EQ(val_1->data, val_lookup->data)
+
+    val_lookup = hash_table_lookup(hash_table, key_2);
+    ASSERT_TRUE(val_lookup)
+    ASSERT_EQ(val_2->data, val_lookup->data)
+
+    val_lookup = hash_table_lookup(hash_table, key_3);
+    ASSERT_TRUE(val_lookup)
+    ASSERT_EQ(val_3->data, val_lookup->data)
+
+    hash_table_remove(hash_table, key_1);
+    elem_key_t key_lookup = elem_key_create(1);
+    val_lookup = hash_table_lookup(hash_table, key_lookup);
+    ASSERT_FALSE(val_lookup)
+    free(key_lookup);
+
+    hash_table_remove(hash_table, key_2);
+    key_lookup = elem_key_create(2);
+    val_lookup = hash_table_lookup(hash_table, key_lookup);
+    ASSERT_FALSE(val_lookup)
+    free(key_lookup);
+
+    hash_table_remove(hash_table, key_3);
+    key_lookup = elem_key_create(3);
+    val_lookup = hash_table_lookup(hash_table, key_lookup);
+    ASSERT_FALSE(val_lookup)
+    free(key_lookup);
+
+    hash_table_free(hash_table);
+END_TEST
+
+DEFINE_TEST(test_hash_table_size_2)
+    hash_table_t hash_table = hash_table_create(
+        elem_key_hash,
+        elem_key_compare,
+        elem_key_free,
+        elem_val_free
+    );
+
+    ASSERT_EQ(0, hash_table_size(hash_table))
+
+    elem_key_t key_1 = elem_key_create(1);
+    elem_key_t key_2 = elem_key_create(2);
+    elem_key_t key_3 = elem_key_create(3);
+
+    elem_val_t val_1 = elem_val_create('A');
+    elem_val_t val_2 = elem_val_create('B');
+    elem_val_t val_3 = elem_val_create('C');
+
+    hash_table_insert(hash_table, (void *) key_1, (void *) val_1);
+    ASSERT_EQ(1, hash_table_size(hash_table))
+
+    hash_table_insert(hash_table, (void *) key_2, (void *) val_2);
+    ASSERT_EQ(2, hash_table_size(hash_table))
+
+    hash_table_remove(hash_table, key_1);
+    ASSERT_EQ(1, hash_table_size(hash_table))
+
+    hash_table_insert(hash_table, (void *) key_3, (void *) val_3);
+    ASSERT_EQ(2, hash_table_size(hash_table))
+
+    hash_table_remove(hash_table, key_2);
+    ASSERT_EQ(1, hash_table_size(hash_table));
+
+    hash_table_remove(hash_table, key_3);
+    ASSERT_EQ(0, hash_table_size(hash_table));
+
+    hash_table_free(hash_table);
+END_TEST
+
 REGISTER_TESTS(
     test_hash_table_create_destroy,
     test_hash_table_size_1,
     test_hash_table_resizes_1,
     test_hash_table_lookup_1,
     test_hash_table_lookup_2,
-    test_hash_table_remove_1
+    test_hash_table_remove_1,
+    test_hash_table_remove_2,
+    test_hash_table_size_2
 )
