@@ -11,12 +11,21 @@
 
 typedef int *(*schedule_func_t)(void *);
 
+struct addr;
+typedef struct addr *addr_t;
+
+struct port;
+typedef struct port *port_t;
+
+typedef addr_t (*packet_read_addr_func_t)(void *);
+
 struct network_switch {
     unsigned int num_ports;
     hash_table_t port_mapping;
     queue_t **voqs;
     free_func_t free_packet;
     schedule_func_t schedule;
+    packet_read_addr_func_t read_addr;
 };
 
 typedef struct network_switch *network_switch_t;
