@@ -7,13 +7,16 @@
 
 #include "./../data_structures/queue.h"
 #include "./../data_structures/heap.h"
+#include "./../data_structures/hash_table.h"
 
 typedef int *(*schedule_func_t)(void *);
 
 struct network_switch {
     unsigned int num_ports;
+    hash_table_t port_mapping;
     queue_t **voqs;
     free_func_t free_packet;
+    schedule_func_t schedule;
 };
 
 typedef struct network_switch *network_switch_t;
