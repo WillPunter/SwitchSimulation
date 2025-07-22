@@ -3,9 +3,10 @@
     Implementation of generic binary heap. */
 
 #include "heap.h"
+#include <malloc.h>
 #include <assert.h>
 
-static const DEFAULT_CAPACITY = 16;
+static const int DEFAULT_CAPACITY = 16;
 
 /*  Heap structure. */
 struct heap {
@@ -57,7 +58,8 @@ heap_t heap_create(comparator_func_t comparator, free_func_t free_elem) {
 
 /*  Free a heap - freeing a heap involves first calling the free_elem routine
     provided at creation (in the heap_create function) on all of the elements,
-    then freeing the heap structure itself.*/
+    then freeing the underlying entry structnre and finally the heap structure
+    itself.*/
 void heap_free(heap_t heap) {
     assert(heap);
 
@@ -65,6 +67,8 @@ void heap_free(heap_t heap) {
     for (i = 0; i < heap->size; i++) {
         heap->free_elem(heap->elems[i]);
     }
+
+    free(heap->elems);
 
     free((void *) heap);
 };
@@ -88,7 +92,10 @@ void heap_insert(heap_t heap, void *elem) {
     /*  Resize if capacity exceeded. */
     if (heap->size + 1 > heap->capacity) {
         heap->capacity = heap->capacity * 2;
-        heap->elems = (void **) realloc(sizeof(void *) * heap->capacity);
+        heap->elems = (void **) realloc(
+            (void *) heap->elems,
+            sizeof(void *) * heap->capacity
+        );
     }
 
     heap->elems[heap->size] = elem;
@@ -106,7 +113,7 @@ void heap_insert(heap_t heap, void *elem) {
 
         /*  Update indices. */
         index = parent;
-        parent = get_parent_index(index);
+        parent = parent_index(index);
     }
 };
 
@@ -135,7 +142,7 @@ void *heap_pop_min(heap_t heap) {
 
     while (
         has_child(heap, index) &&
-        (child_index = largest_child_less_than(heap, index))
+        (child_index = largest_child_greater_than(heap, index))
     ) {
         swap_elem(heap, index, child_index);
     }

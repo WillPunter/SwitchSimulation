@@ -24,5 +24,6 @@ void hash_table_free(hash_table_t hash_table);
 void *hash_table_lookup(hash_table_t hash_table, void *key);
 void hash_table_insert(hash_table_t hash_table, void *key, void *value);
 void hash_table_remove(hash_table_t hash_table, void *key);
+int hash_table_size(hash_table_t hash_table);
 
 #endif

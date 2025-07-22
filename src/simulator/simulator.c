@@ -1,7 +1,6 @@
 /*  simulator.c */
 
 #include "simulator.h"
-#include "heap.h"
 #include "event_table.h"
 
 /*  Structures and types. */
@@ -12,14 +11,6 @@ struct event {
 };
 
 typedef struct event *event_t;
-
-enum time_type {
-    UINT_TIME,
-    DOUBLE_TIME,
-    CUSTOM_TIME
-};
-
-typedef enum time_type time_type_t;
 
 struct uint_time {
     unsigned int time;
@@ -32,9 +23,6 @@ struct double_time {
 };
 
 typedef struct double_time *double_time_t;
-
-typedef void (*add_func_t)(void *, void *);
-typedef void (*copy_func_t)(void *, void *);
 
 static event_table_t event_table;
 static heap_t event_queue;
@@ -192,6 +180,11 @@ void simulator_main_loop() {
         free(next_event_ptr);
     };
 };
+
+/*  Simulation should terminate. */
+void simulator_set_should_terminate() {
+    should_terminate = 1;
+}
 
 /*  Helper function implementations. */
 

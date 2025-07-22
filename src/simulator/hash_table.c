@@ -2,6 +2,8 @@
 
 #include "hash_table.h"
 #include <assert.h>
+#include <malloc.h>
+#include <string.h>
 #include <stddef.h>
 
 #define DEFAULT_CAPACITY 32
@@ -80,7 +82,7 @@ void hash_table_free(hash_table_t hash_table) {
 
     int i;
     for (i = 0; i < hash_table->capacity; i++) {
-        hash_table_entry_t *entry = hash_table->entries[i];
+        hash_table_entry_t entry = hash_table->entries[i];
 
         if (entry) {
             hash_table_entry_t prev = NULL;
@@ -119,7 +121,7 @@ void *hash_table_lookup(hash_table_t hash_table, void *key) {
     assert(hash_table->entries);
     assert(hash_table->key_compare);
     assert(key);
-    
+
     hash_t hash = hash_table->hash_func(key) % hash_table->capacity;
 
     if (hash_table->entries[hash]) {
@@ -130,11 +132,11 @@ void *hash_table_lookup(hash_table_t hash_table, void *key) {
 
             if (compare == EQ) {
                 return curr->val;
-            }
+            };
 
             curr = curr->next;
-        }
-    }
+        };
+    };
 
     return NULL;
 };
@@ -168,7 +170,17 @@ void hash_table_insert(hash_table_t hash_table, void *key, void *value) {
 
         while (curr) {
             if (hash_table->key_compare(key, curr->key) == EQ) {
+                
+                if (curr->key != key) {
+                    hash_table->free_key(curr->key);
+                }
+
                 curr->key = key;
+                
+                if (curr->val != value) {
+                    hash_table->free_val(curr->val);
+                }
+
                 curr->val = value;
                 return;
             }
@@ -199,11 +211,15 @@ void hash_table_insert(hash_table_t hash_table, void *key, void *value) {
                         elems[current_elem].key = curr->key;
                         elems[current_elem].val = curr->val;
                         current_elem++;
+                        
+                        /*  Free old entry now key and value pointers are
+                            copied. */
+                        hash_table_entry_t prev = curr;
                         curr = curr->next;
-                        free(curr);
-                    }
-                }
-            }
+                        free(prev);
+                    };
+                };
+            };
 
             /*  Free existing entry array. */
             hash_table->size = 0;
@@ -214,19 +230,22 @@ void hash_table_insert(hash_table_t hash_table, void *key, void *value) {
                 sizeof(hash_table_entry_t) * hash_table->capacity
             );
 
+            memset(hash_table->entries, 0, sizeof(hash_table_entry_t) * hash_table->capacity);
+
             /*  Insert elements back in to hash table. */
             for (i = 0; i < current_elem; i++) {
                 hash_table_insert(hash_table, elems[i].key, elems[i].val);
-            }
+            };
 
             free(elems);
-        }
+        };
 
         hash_table->size ++;
 
         /*  Allocate new entry structure and insert in place. */
         hash_table_entry_t new_entry =
             (hash_table_entry_t) malloc(sizeof(struct hash_table_entry));
+        assert(new_entry);
         
         new_entry->key = key;
         new_entry->val = value;
@@ -246,8 +265,8 @@ void hash_table_insert(hash_table_t hash_table, void *key, void *value) {
         } else {
             /*  No linked list / chain at location yet - start one. */
             hash_table->entries[hash] = new_entry;
-        }
-    }
+        };
+    };
 };
 
 /*  Hash table remove - to remove an element from a hash table, simply look up
@@ -265,18 +284,28 @@ void hash_table_remove(hash_table_t hash_table, void *key) {
             if (hash_table->key_compare(key, curr->key) == EQ) {
                 hash_table->free_key(curr->key);
                 hash_table->free_val(curr->val);
+                hash_table->size --;
 
                 *ptr = curr->next;
                 free((void *) curr);
 
                 return;
-            }
+            };
 
             if (curr->next) {
                 ptr = &curr->next;
-            }
-            
+            };
+
             curr = curr->next;
-        }
-    }
+        };
+    };
+};
+
+/*  Hash table size - return the size of the hash table, referring to the
+    number of data elements stored in it, not the capacity of the underlying
+    array. */
+int hash_table_size(hash_table_t hash_table) {
+    assert(hash_table);
+
+    return hash_table->size;
 };
