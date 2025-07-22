@@ -3,11 +3,14 @@
 #include "queue.h"
 #include "heap.h"
 #include <assert.h>
+#include <stddef.h>
 
 struct queue {
     void **elems;
     unsigned int head;
     unsigned int tail;
+    unsigned int size; /* Size is needed to resolve ambiguous case where
+                          head == tail (can be empty or full).*/
     unsigned int capacity;
     free_func_t free_elem;
 };
@@ -25,6 +28,7 @@ queue_t queue_create(free_func_t free_elem) {
 
     queue->head = 0;
     queue->tail = 0;
+    queue->size = 0;
     queue->capacity = DEFAULT_CAPACITY;
 
     queue->elems = (void **) malloc(sizeof(void *) * queue->capacity);
@@ -55,14 +59,12 @@ void queue_free(queue_t queue) {
     this is simply just tail - head, but if the tail pointer has wrapped back
     around, then it is capacity - head + tail. */
 unsigned int queue_size(queue_t queue) {
-    return (queue->head < queue->tail) ?
-        queue->tail - queue->head :
-        queue->capacity - queue->head + queue->tail;
+    return queue->size;
 };
 
 /*  Queue empty - returns 1 when the queue is empty and 0 otherwise. */
 unsigned int queue_empty(queue_t queue) {
-    return (queue->head == queue->tail) ? 1 : 0;
+    return queue->size == 0;
 }
 
 /*  Enqueue elem - this adds an element to the back of the queue. First we need
@@ -90,12 +92,29 @@ void queue_enqueue(queue_t queue, void *elem) {
 
     queue->elems[queue->tail] = elem;
     queue->tail = (queue->tail + 1) % queue->capacity;
+    queue->size++;
 };
 
+/*  Queue peek - if nonempty this returns the front
+    element, otherwise it returns a NULL pointer. */
 void *queue_peek(queue_t queue) {
+    if (queue->size == 0) {
+        return NULL;
+    };
 
+    return queue->elems[queue->head];
 };
 
+/*  Queue dequeue - if nonempty, advance the head pointer and return the
+    previous element. If empty, return NULL. */
 void *queue_dequeue(queue_t queue) {
+    if (queue->size == 0) {
+        return NULL;
+    };
 
+    void *elem = queue->elems[queue->head];
+    queue->head = (queue->head + 1) % queue->capacity;
+    queue->size--;
+    
+    return elem;
 };
