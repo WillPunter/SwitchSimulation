@@ -60,8 +60,36 @@ unsigned int queue_size(queue_t queue) {
         queue->capacity - queue->head + queue->tail;
 };
 
-void queue_enqueue(queue_t queue, void *elem) {
+/*  Queue empty - returns 1 when the queue is empty and 0 otherwise. */
+unsigned int queue_empty(queue_t queue) {
+    return (queue->head == queue->tail) ? 1 : 0;
+}
 
+/*  Enqueue elem - this adds an element to the back of the queue. First we need
+    to check if the increased size would exceed the capacity. If so, we need to
+    resize the underlying array */
+void queue_enqueue(queue_t queue, void *elem) {
+    unsigned int size = queue_size(queue);
+
+    if (size + 1 > queue->capacity) {
+        /*  Resize underlying array. */
+        void **new_buffer = malloc(sizeof(void *) * queue->capacity * 2); 
+        
+        int i = queue->head;
+        int index = 0;
+        while (i != queue->tail) {
+            new_buffer[index] = queue->elems[i];
+            i = (i + 1) % queue->capacity;
+            index++;
+        };
+        free(queue->elems);
+        queue->elems = new_buffer;
+        queue->head = 0;
+        queue->tail = index;
+    };
+
+    queue->elems[queue->tail] = elem;
+    queue->tail = (queue->tail + 1) % queue->capacity;
 };
 
 void *queue_peek(queue_t queue) {
