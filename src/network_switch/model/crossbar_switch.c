@@ -56,8 +56,18 @@ crossbar_switch_t crossbar_switch_create(
     return crossbar_switch;
 };
 
-void crossbar_switch_free(crossbar_switch_t crossbar_switch);
+/*  Free crossbar switch - freeing a crossbar switch structure involves freeing
+    the input, crossbar and output elements independently and then freeing the
+    underlying structure. */
+void crossbar_switch_free(crossbar_switch_t crossbar_switch) {
+    crossbar_switch->input_free(crossbar_switch->input);
+    crossbar_switch->crossbar_free(crossbar_switch->crossbar);
+    crossbar_switch->output_free(crossbar_switch->output);
+    free((void *) crossbar_switch);
+};
 
+/*  Receive packet for crossbar switch - receiving a packet for the crossbar
+    switch simply just delegates to the input structure. */
 void crossbar_switch_recv_packet(
     crossbar_switch_t crossbar_switch,
     port_num_t input_port,
