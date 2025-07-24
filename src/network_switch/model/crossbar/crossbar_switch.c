@@ -42,16 +42,19 @@ crossbar_switch_t crossbar_switch_create(
     assert(crossbar_switch->input_output_map);
 
     crossbar_switch->input = input;
+    crossbar_switch->input->host_switch = crossbar_switch;
     crossbar_switch->input->data =
         crossbar_switch->input->create_input(num_ports);
     assert(crossbar_switch->input->data);
 
     crossbar_switch->crossbar = crossbar;
+    crossbar_switch->crossbar->host_switch = crossbar_switch;
     crossbar_switch->crossbar->data =
         crossbar_switch->crossbar->create_crossbar(num_ports);
     assert(crossbar_switch->crossbar->data);
 
     crossbar_switch->output = output;
+    crossbar_switch->output->host_switch = crossbar_switch;
     crossbar_switch->output->data =
         crossbar_switch->output->create_output(num_ports);
     assert(crossbar_switch->output->data);
