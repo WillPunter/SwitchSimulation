@@ -24,7 +24,7 @@
 enum register_outcome {
     REGISTER_SUCCESS,
     REGISTER_ALREADY_REGISTERED,
-    REGISTER_NOT_PRESENT
+    REGISTER_NOT_REGISTERED
 };
 
 typedef enum register_outcome register_outcome_t;

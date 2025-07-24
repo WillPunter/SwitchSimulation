@@ -127,13 +127,33 @@ register_outcome_t network_switch_register_host(
     return REGISTER_ALREADY_REGISTERED;
 };
 
+/*  Deregister host - this removes the host from the hosts buffer and the
+    address table entry. */
 register_outcome_t network_switch_deregister_host(
-    network_switch_t *network_switch,
-    port_num_t port
-);
+    network_switch_t network_switch,
+    port_num_t port_num
+) {
+    assert(network_switch);
+
+    if (network_switch->hosts[port_num].active == 1) {
+        /*  NOTE: this may well cause a runtime error due to trying to free
+            from an unallocated address - it might be necessary to refactor the
+            hash table interface to prevent this. */
+        hash_table_remove(
+            network_switch->addr_table,
+            &network_switch->hosts[port_num].addr
+        );
+
+        network_switch->hosts[port_num].active = 0;
+
+        return REGISTER_SUCCESS;
+    };
+
+    return REGISTER_NOT_REGISTERED;
+};
 
 void network_switch_recv_packet(
-    network_switch_t *network_switch,
+    network_switch_t network_switch,
     void *packet,
     port_num_t input_port
 );
