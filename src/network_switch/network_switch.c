@@ -24,15 +24,19 @@ port_num_t port_num_value_get(port_num_value_t port_num_value);
 
 /*  Generic switch API implementation. */
 
-/*  Initialise network switch structure - this involves */
-void network_switch_init(
-    network_switch_t *network_switch,
+/*  Create a network switch structure - this creates and returns a new network
+    switch wrapper structure. It initialises all of the required structures
+    such as the intermediary packet buffers for the input and output ports and
+    also the address to port lookup table. */
+network_switch_t network_switch_create(
     port_num_t num_ports,
     void *switch_logic,
     hash_func_t addr_hash,
     comparator_func_t addr_compare,
     free_func_t addr_free
 ) {
+    network_switch_t network_switch =
+        (network_switch_t) malloc(sizeof(struct network_switch));
     assert(network_switch);
 
     network_switch->num_ports = num_ports;
@@ -68,9 +72,32 @@ void network_switch_init(
     assert(network_switch->addr_table);
 
     network_switch->switch_logic = switch_logic;
+
+    return network_switch;
 };
 
-void network_switch_free(network_switch_t *network_switch);
+/*  Network switch free - this deallocates all of the structures allocated upon
+    creation:
+        - The address table.
+        - The input and output packet buffers.
+        - The input and output occupied flags.
+        - The host buffer.
+        - The underlying network switch structure. */
+void network_switch_free(network_switch_t network_switch) {
+    assert(network_switch);
+
+    hash_table_free(network_switch->addr_table);
+
+    free((void *) network_switch->input_ports);
+    free((void *) network_switch->output_ports);
+
+    free((void *) network_switch->input_port_occupied);
+    free((void *) network_switch->output_port_occupied);
+
+    free((void *) network_switch->hosts);
+
+    free((void *) network_switch);
+};
 
 void network_switch_register_host(
     network_switch_t *network_switch,

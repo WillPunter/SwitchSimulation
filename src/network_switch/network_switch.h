@@ -43,34 +43,33 @@ struct network_switch {
     void *switch_logic;
 };
 
-typedef struct network_switch network_switch_t;
+typedef struct network_switch *network_switch_t;
 
 /*  Network switch API to switch logic (not to environment / simulation). */
-void network_switch_init(
-    network_switch_t *network_switch,
+network_switch_t network_switch_init(
     port_num_t num_ports,
     void *switch_logic,
     hash_func_t addr_hash,
     comparator_func_t addr_compare,
     free_func_t addr_free
 );
-void network_switch_free(network_switch_t *network_switch);
+void network_switch_free(network_switch_t network_switch);
 void network_switch_register_host(
-    network_switch_t *network_switch,
+    network_switch_t network_switch,
     void *host,
     port_num_t port_num
 );
 void network_switch_deregister_host(
-    network_switch_t *network_switch,
+    network_switch_t network_switch,
     port_num_t port
 );
 void network_switch_recv_packet(
-    network_switch_t *network_switch,
+    network_switch_t network_switch,
     void *packet,
     port_num_t input_port
 );
 void network_switch_send_packet(
-    network_switch_t *network_switch,
+    network_switch_t network_switch,
     port_num_t output_port
 );
 
