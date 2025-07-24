@@ -187,10 +187,19 @@ void network_switch_recv_packet(
     );
 };
 
+/*  Network switch send packet - this simply copies the packet in the output
+    buffer if present to the host using the provided send function. */
 void network_switch_send_packet(
     network_switch_t network_switch,
     port_num_t output_port
-);
+) {
+    assert(network_switch->output_port_occupied[output_port] == 1);
+    assert(network_switch->hosts[output_port].active == 1);
+
+    network_switch->hosts[output_port].send_packet(
+        &network_switch->output_ports[output_port]
+    );
+};
 
 /*  Helper function implementations. */
 port_num_value_t port_num_value_create(port_num_t value) {

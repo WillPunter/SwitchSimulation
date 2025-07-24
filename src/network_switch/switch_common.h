@@ -13,6 +13,7 @@ typedef unsigned int port_num_t;
 struct host_descriptor {
     void *addr;
     char active;
+    void (*send_packet)(void *);
 };
 
 typedef struct host_descriptor host_descriptor_t;
