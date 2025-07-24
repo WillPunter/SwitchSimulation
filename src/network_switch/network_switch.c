@@ -9,6 +9,7 @@
 
 #include "network_switch.h"
 #include <assert.h>
+#include <string.h>
 
 /*  Port number structure used for hash table. */
 struct port_num_value {
@@ -28,9 +29,11 @@ port_num_t port_num_value_get(port_num_value_t port_num_value);
     switch wrapper structure. It initialises all of the required structures
     such as the intermediary packet buffers for the input and output ports and
     also the address to port lookup table. */
-network_switch_t network_switch_create(
+network_switch_t network_switch_init(
     port_num_t num_ports,
     void *switch_logic,
+    func_send_packet_t switch_logic_send_packet,
+    func_read_packet_dest_addr_t read_dest_addr,
     hash_func_t addr_hash,
     comparator_func_t addr_compare,
     free_func_t addr_free
@@ -75,6 +78,9 @@ network_switch_t network_switch_create(
     assert(network_switch->addr_table);
 
     network_switch->switch_logic = switch_logic;
+    network_switch->switch_logic_send_packet = switch_logic_send_packet;
+
+    network_switch->read_dest_addr = read_dest_addr;
 
     return network_switch;
 };
@@ -152,14 +158,37 @@ register_outcome_t network_switch_deregister_host(
     return REGISTER_NOT_REGISTERED;
 };
 
+/*  Receive a packet - receiving a packet involves copying the packet into the
+    corresponding buffer, reading it's header to obtain a destination address,
+    identifying the output port it corresponds to and passing it to the switch
+    logic. */
 void network_switch_recv_packet(
     network_switch_t network_switch,
     void *packet,
     port_num_t input_port
-);
+) {
+    assert(network_switch->input_port_occupied[input_port] == 0);
+
+    memcpy(network_switch->input_ports[input_port], packet, PACKET_SIZE);
+    network_switch->input_port_occupied[input_port] = 1;
+
+    void *addr = network_switch->read_dest_addr(packet);
+    void *output_port_ptr =
+        hash_table_lookup(network_switch->addr_table, addr);
+    assert(output_port_ptr);
+
+    port_num_t output_port =
+        port_num_value_get((port_num_value_t) output_port_ptr);
+    
+    network_switch->switch_logic_send_packet(
+        network_switch,
+        input_port,
+        output_port
+    );
+};
 
 void network_switch_send_packet(
-    network_switch_t *network_switch,
+    network_switch_t network_switch,
     port_num_t output_port
 );
 

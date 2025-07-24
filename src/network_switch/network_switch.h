@@ -48,7 +48,10 @@ struct network_switch {
     host_descriptor_t *hosts;
 
     hash_table_t addr_table;
+    func_read_packet_dest_addr_t read_dest_addr;
+
     void *switch_logic;
+    func_send_packet_t switch_logic_send_packet;
 };
 
 typedef struct network_switch *network_switch_t;
@@ -57,6 +60,8 @@ typedef struct network_switch *network_switch_t;
 network_switch_t network_switch_init(
     port_num_t num_ports,
     void *switch_logic,
+    func_send_packet_t switch_logic_send_packet,
+    func_read_packet_dest_addr_t read_dest_addr,
     hash_func_t addr_hash,
     comparator_func_t addr_compare,
     free_func_t addr_free

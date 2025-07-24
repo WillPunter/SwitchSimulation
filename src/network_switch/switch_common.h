@@ -17,4 +17,7 @@ struct host_descriptor {
 
 typedef struct host_descriptor host_descriptor_t;
 
+typedef void (*func_send_packet_t)(void *, port_num_t, port_num_t);
+typedef void *(*func_read_packet_dest_addr_t)(void *);
+
 #endif
