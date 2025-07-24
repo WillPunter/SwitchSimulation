@@ -59,7 +59,10 @@ network_switch_t network_switch_create(
         (char *) malloc(sizeof(char) * num_ports);
     assert(network_switch->output_port_occupied);
 
-    network_switch->hosts = (void **) malloc(sizeof(void *) * num_ports);
+    network_switch->hosts =
+        (host_descriptor_t *) malloc(
+            sizeof(struct host_descriptor) * num_ports
+        );
     assert(network_switch->hosts);
 
     network_switch->addr_table =
@@ -99,13 +102,32 @@ void network_switch_free(network_switch_t network_switch) {
     free((void *) network_switch);
 };
 
-void network_switch_register_host(
-    network_switch_t *network_switch,
-    void *host,
+/*  Register host - this involves adding the host descriptor provided to
+    the provided port number (if not already occupied) and then*/
+register_outcome_t network_switch_register_host(
+    network_switch_t network_switch,
+    host_descriptor_t host_descriptor,
     port_num_t port_num
-);
+) {
+    assert(network_switch);
 
-void network_switch_deregister_host(
+    if (network_switch->hosts[port_num].active == 0) {
+        network_switch->hosts[port_num] = host_descriptor;
+        network_switch->hosts[port_num].active = 1;
+
+        hash_table_insert(
+            network_switch->addr_table,
+            &network_switch->hosts[port_num].addr,
+            (void *) port_num_value_create(port_num)
+        );
+
+        return REGISTER_SUCCESS;
+    };
+
+    return REGISTER_ALREADY_REGISTERED;
+};
+
+register_outcome_t network_switch_deregister_host(
     network_switch_t *network_switch,
     port_num_t port
 );

@@ -21,6 +21,14 @@
 #include "switch_common.h"
 #include "./../data_structures/hash_table.h"
 
+enum register_outcome {
+    REGISTER_SUCCESS,
+    REGISTER_ALREADY_REGISTERED,
+    REGISTER_NOT_PRESENT
+};
+
+typedef enum register_outcome register_outcome_t;
+
 /*  Network switch wrapper function. */
 struct network_switch {
     port_num_t num_ports;
@@ -37,7 +45,7 @@ struct network_switch {
     char (*output_ports)[PACKET_SIZE];
     char *output_port_occupied;
 
-    void **hosts;
+    host_descriptor_t *hosts;
 
     hash_table_t addr_table;
     void *switch_logic;
@@ -54,12 +62,12 @@ network_switch_t network_switch_init(
     free_func_t addr_free
 );
 void network_switch_free(network_switch_t network_switch);
-void network_switch_register_host(
+register_outcome_t network_switch_register_host(
     network_switch_t network_switch,
-    void *host,
+    host_descriptor_t host_descriptor,
     port_num_t port_num
 );
-void network_switch_deregister_host(
+register_outcome_t network_switch_deregister_host(
     network_switch_t network_switch,
     port_num_t port
 );
