@@ -17,7 +17,7 @@ typedef struct switch_cb_ib_voqs_iSLIP *switch_logic_t;
 
 /*  Forward declare helper functions. */
 static switch_logic_t switch_logic_create(port_num_t num_ports);
-
+static void switch_logic_free(switch_logic_t switch_logic);
 static void recv_packet(
     void *network_switch,
     void *packet,
@@ -80,4 +80,14 @@ static switch_logic_t switch_logic_create(port_num_t num_ports) {
     assert(switch_logic->input_output_map);
 
     return switch_logic;
+};
+
+static void switch_logic_free(switch_logic_t switch_logic) {
+    assert(switch_logic);
+    assert(switch_logic->voqs);
+    assert(switch_logic->input_output_map);
+
+    free((void *) switch_logic->voqs);
+    free((void *) switch_logic->input_output_map);
+    free((void *) switch_logic);
 };
