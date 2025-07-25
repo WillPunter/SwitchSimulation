@@ -57,7 +57,7 @@ struct network_switch {
 typedef struct network_switch *network_switch_t;
 
 /*  Network switch API to switch logic (not to environment / simulation). */
-network_switch_t network_switch_init(
+network_switch_t network_switch_create(
     port_num_t num_ports,
     void *switch_logic,
     func_send_packet_t switch_logic_send_packet,

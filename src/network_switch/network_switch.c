@@ -2,7 +2,6 @@
 
     Implementation of generic switch wrapper. */
 
-
 /*  IDEA - maybe we can move the packet address to port mapping inside the
     generic switch and simply just have the internal switch logic deal with
     ports rather than addresses? */
@@ -29,7 +28,7 @@ port_num_t port_num_value_get(port_num_value_t port_num_value);
     switch wrapper structure. It initialises all of the required structures
     such as the intermediary packet buffers for the input and output ports and
     also the address to port lookup table. */
-network_switch_t network_switch_init(
+network_switch_t network_switch_create(
     port_num_t num_ports,
     void *switch_logic,
     func_send_packet_t switch_logic_send_packet,

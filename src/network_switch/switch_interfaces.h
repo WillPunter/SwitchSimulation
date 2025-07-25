@@ -49,7 +49,7 @@ struct i_generic_switch {
     i_func_recv_packet_t recv_packet;
 };
 
-typedef struct generic_switch generic_switch_t;
+typedef struct i_generic_switch i_generic_switch_t;
 
 /*  Cycle interface - this provides an interface for a switch to be used in a
     cycle based simulation. Since all operations are performed in one cycle,
@@ -68,6 +68,8 @@ struct i_cycle_simulation_switch {
     i_func_recv_packet_t recv_packet;
     void (*tick)();
 };
+
+typedef struct i_cycle_simulation_switch i_cycle_simulation_switch_t;
 
 /* Discrete event interface - TODO: figure out how this should work. */
 
