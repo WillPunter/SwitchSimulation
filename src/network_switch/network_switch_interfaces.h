@@ -18,7 +18,7 @@ struct i_cycle_sim_switch {
     void (*free)(void *);
     register_result_t (*register_host)(void *, host_desc_t, port_num_t);
     register_result_t (*deregister_host)(void *, port_num_t);
-    void tick(void *arg);
+    void (*tick)(void *, void *);
 };
 
 typedef struct i_cycle_sim_switch i_cycle_sim_switch_t;

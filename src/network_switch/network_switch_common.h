@@ -8,13 +8,17 @@
 
 #define ADDR_SIZE 4
 
+#define PACKET_SIZE 64
+
+#define ISLIP_ROUNDS(n) (int) ceil(log2(n))
+
 #include "./../data_structures/heap.h"
 #include "./../data_structures/hash_table.h"
 
 /*  Address descriptor - this provides a set of pointers to functions required
     to obtain and process addresses. */
 struct addr_desc {
-    void (*get_addr_from_packet)(void *);
+    void *(*get_addr_from_packet)(void *);
     hash_func_t addr_hash;
     comparator_func_t addr_compare;
     free_func_t addr_free;
