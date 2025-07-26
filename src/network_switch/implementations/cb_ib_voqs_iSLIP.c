@@ -62,6 +62,17 @@ static void cb_ib_voqs_iSLIP_free(void *network_switch_ptr) {
 };
 
 /*  Register a host. */
+register_result_t cb_ib_voqs_iSLIP_cycle_switch_register_host(
+    void *network_switch_ptr,
+    host_desc_t host_desc,
+    port_num_t port
+) {
+    assert(network_switch_ptr);
+    network_switch_t network_switch = (network_switch_t) network_switch_ptr;
+
+    assert(network_switch->host_table);
+    return host_table_register(network_switch->host_table, host_desc, port);
+};
 
 /*  Deregister a host. */
 
