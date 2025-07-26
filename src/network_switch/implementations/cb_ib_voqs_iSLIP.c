@@ -148,11 +148,11 @@ register_result_t cb_ib_voqs_iSLIP_cycle_switch_deregister_host(
 static void iSLIP_schedule(
     network_switch_t network_switch,
     port_num_t *port_mapping,
-    char *active_mapping
+    char *mapping_active
 ) {
     assert(network_switch);
     assert(port_mapping);
-    assert(active_mapping);
+    assert(mapping_active);
     
     int r;
     int i;
@@ -160,8 +160,8 @@ static void iSLIP_schedule(
 
     /*  Reset schedule. */
     for (i = 0; i < network_switch->num_ports; i++) {
-        network_switch->port_match[i] = 0;
-        network_switch->port_match_active[i] = 0;
+        port_mapping[i] = 0;
+        mapping_active[i] = 0;
     };
 
     /*  Create arrays for matched inputs, matched outputs, request granted*/
@@ -241,8 +241,8 @@ static void iSLIP_schedule(
                             match_found = 1;
                             input_matched[i] = 1;
                             output_matched[output_port] = 1;
-                            network_switch->port_match[i] = output_port;
-                            network_switch->port_match_active[i] = 1;
+                            port_mapping[i] = output_port;
+                            mapping_active[i] = 1;
                             network_switch->iSLIP_grant_ptr[output_port] =
                                 (network_switch->iSLIP_grant_ptr[output_port] + 1) %
                                 network_switch->num_ports;
@@ -316,6 +316,18 @@ void cb_ib_voqs_iSLIP_cycle_switch_tick(
         (char *) malloc(sizeof(char) * network_switch->num_ports);
     
     iSLIP_schedule(network_switch, port_mapping, map_active);
+    
+    memcpy(
+        network_switch->port_match,
+        port_mapping,
+        sizeof(port_num_t) * network_switch->num_ports
+    );
+    
+    memcpy(
+        network_switch->port_match_active,
+        map_active,
+        sizeof(char) * network_switch->num_ports
+    );
 
     /*  Output on chosen ports. */
     int i;
