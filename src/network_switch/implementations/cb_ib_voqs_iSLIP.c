@@ -203,7 +203,11 @@ static void iSLIP_schedule(
             if (output_matched[i] == 0) {
                 grant_input_found = 0;
 
-                for (j = 0; j < network_switch->num_ports && !grant_input_found; j++) {
+                for (
+                    j = 0;
+                    j < network_switch->num_ports && !grant_input_found;
+                    j++
+                ) {
                     port_num_t input_port =
                         (network_switch->iSLIP_grant_ptr[i] + j) %
                         network_switch->num_ports;
@@ -224,7 +228,11 @@ static void iSLIP_schedule(
         /*  Accept phase - each unmatched input cycles through its grants and
             chooses the first one starting from output_ptr. It accepts the
             grant and the input and output become matched. */
-        for (i = 0; i < network_switch->num_ports; i++) {
+        for (
+            i = 0;
+            i < network_switch->num_ports;
+            i++
+        ) {
             if (input_matched[i] == 0) {
                 match_found = 0;
                 for (j = 0; j < network_switch->num_ports && !match_found; j++) {
@@ -364,7 +372,7 @@ i_cycle_sim_switch_t cb_ib_voqs_iSLIP_cycle_switch() {
         cb_ib_voqs_iSLIP_cycle_switch_register_host;
     cycle_switch.deregister_host =
         cb_ib_voqs_iSLIP_cycle_switch_deregister_host;
-    cycle_switch.tick = NULL;
+    cycle_switch.tick = cb_ib_voqs_iSLIP_cycle_switch_tick;
 
     return cycle_switch;
 };
