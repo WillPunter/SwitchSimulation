@@ -7,13 +7,13 @@
 /*  API function implementations. */
 
 /*  Create address descriptor structure. */
-addr_desc_t addr_desc_create(
+addr_desc_t *addr_desc_create(
     void (*get_addr_from_packet)(void *),
     hash_func_t addr_hash,
     comparator_func_t addr_compare,
     free_func_t addr_free
 ) {
-    addr_desc_t addr_desc = (addr_desc_t) malloc(sizeof(struct addr_desc));
+    addr_desc_t *addr_desc = (addr_desc_t *) malloc(sizeof(struct addr_desc));
     assert(addr_desc);
 
     addr_desc->get_addr_from_packet = get_addr_from_packet;
@@ -25,18 +25,18 @@ addr_desc_t addr_desc_create(
 };
 
 /*  Free address descriptor structure. */
-void addr_desc_free(addr_desc_t addr_desc) {
+void addr_desc_free(addr_desc_t *addr_desc) {
     free((void *) addr_desc);
 };
 
 /*  Create host descriptor structure. */
-host_desc_t host_desc_create(
+host_desc_t *host_desc_create(
     void *data,
     void *addr,
     void (*send)(void *, void *),
     free_func_t addr_free
 ) {
-    host_desc_t host_desc = (host_desc_t) malloc(sizeof(struct host_desc));
+    host_desc_t *host_desc = (host_desc_t *) malloc(sizeof(struct host_desc));
     assert(host_desc);
 
     /*  The underlying host structure is not cloned in memory, since once host
@@ -55,7 +55,7 @@ host_desc_t host_desc_create(
 };
 
 /*  Free host descriptor structure. */
-void host_desc_free(host_desc_t host_desc) {
+void host_desc_free(host_desc_t *host_desc) {
     assert(host_desc);
     assert(host_desc->addr);
 

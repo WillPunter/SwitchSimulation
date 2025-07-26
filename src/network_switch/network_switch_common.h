@@ -20,18 +20,26 @@ struct addr_desc {
     free_func_t addr_free;
 };
 
-typedef struct addr_desc *addr_desc_t;
+typedef struct addr_desc addr_desc_t;
 
 /*  Host descriptor - this stores data required to identify and interact with
     a host. */
+enum host_desc_active {
+    HOST_DESC_ACTIVE,
+    HOST_DESC_INACTIVE
+};
+
+typedef enum host_desc_active host_desc_active_t;
+
 struct host_desc {
     void *data;
     void *addr;
     void (*send)(void *, void *);
     free_func_t addr_free;
+    host_desc_active_t active;
 };
 
-typedef struct host_desc *host_desc_t;
+typedef struct host_desc host_desc_t;
 
 /*  Port number - must be an integer type as used for array indexing. */
 typedef unsigned int port_num_t;
@@ -47,23 +55,23 @@ enum register_result {
 typedef enum register_result register_result_t;
 
 /*  Declare API functions. */
-addr_desc_t addr_desc_create(
+addr_desc_t *addr_desc_create(
     void (*get_addr_from_packet)(void *),
     hash_func_t addr_hash,
     comparator_func_t addr_compare,
     free_func_t addr_free
 );
 
-void addr_desc_free(addr_desc_t addr_desc);
+void addr_desc_free(addr_desc_t *addr_desc);
 
-host_desc_t host_desc_create(
+host_desc_t *host_desc_create(
     void *data,
     void *addr,
     void (*send)(void *, void *),
     free_func_t addr_free
 );
 
-void host_desc_free(host_desc_t host_desc);
+void host_desc_free(host_desc_t *host_desc);
 
 void *addr_clone(void *addr);
 

@@ -62,7 +62,7 @@ register_result_t host_table_register(
         return REG_ERROR_INVALID_PORT;
     };
 
-    if (host_table->hosts[port].active == HOST_ACTIVE) {
+    if (host_table->hosts[port].active == HOST_DESC_ACTIVE) {
         return REG_ERROR_ALREADY_SET;
     };
 
@@ -76,7 +76,7 @@ register_result_t host_table_register(
     hash_table_insert(host_table->addr_table, addr, (void *) port_elem_create);
 
     host_table->hosts[port] = host_desc;
-    host_table->hosts[port].active = HOST_ACTIVE;
+    host_table->hosts[port].active = HOST_DESC_ACTIVE;
 
     return hash_table_insert;
 };
@@ -89,26 +89,51 @@ register_result_t host_table_deregister(
         return REG_ERROR_INVALID_PORT;
     };
 
-    if (host_table->hosts[port].active == HOST_INACTIVE) {
+    if (host_table->hosts[port].active == HOST_DESC_INACTIVE) {
         return REG_ERROR_NOT_SET;
     };
 
+    /*  Note that hash_table_remove automatically deallocates the address key
+        structure which was allocated during the register function call.
+        
+        This is not the same memory as &host_table->hosts[port].addr, but the
+        value will be the same according to the comparator as it is simply
+        a copy of this. */
     hash_table_remove(host_table->addr_table, &host_table->hosts[port].addr);
 
-    /*  TODO - let's change host_desc_t to a pointer type instead. */
+    host_table->hosts[port].active = HOST_DESC_INACTIVE;
 };
-
 
 int host_table_port_lookup(
     host_table_t host_table,
     void *addr,
     port_num_t *port_out
-);
+) {
+    port_elem_t port_elem =
+        (port_elem_t) hash_table_lookup(host_table->addr_table, addr);
+    
+    if (port_elem) {
+        *port_out = port_elem->port_num;
+
+        return 1;
+    };
+
+    return 0;
+};
+
 int host_table_host_lookup(
     host_table_t host_table,
     port_num_t port,
     host_desc_t *host_out
-);
+) {
+    if (host_table->hosts[port].active) {
+        *host_out = host_table->hosts[port];
+        
+        return 1;
+    };
+
+    return 0;
+};
 
 /*  Helper function implementations. */
 port_elem_t port_elem_create(port_num_t port) {
