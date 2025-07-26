@@ -46,6 +46,20 @@ static void *cb_ib_voqs_iSLIP_create(port_num_t num_ports, addr_desc_t addr_desc
 };
 
 /*  Free a switch of the cb_ib_voqs_iSLIP variety. */
+static void cb_ib_voqs_iSLIP_free(void *network_switch_ptr) {
+    assert(network_switch_ptr);
+    
+    network_switch_t network_switch = (network_switch_t) network_switch_ptr;
+
+    int i;
+    for (i = 0; i < network_switch->num_ports; i++) {
+        queue_free(network_switch->voqs[i]);
+    };
+
+    free(network_switch->voqs);
+
+    host_table_free(network_switch->host_table);
+};
 
 /*  Register a host. */
 
@@ -56,8 +70,8 @@ static void *cb_ib_voqs_iSLIP_create(port_num_t num_ports, addr_desc_t addr_desc
 /*  API implementation. */
 i_cycle_sim_switch_t cb_ib_voqs_iSLIP_cycle_switch() {
     i_cycle_sim_switch_t cycle_switch;
-    cycle_switch.create = NULL;
-    cycle_switch.free = NULL;
+    cycle_switch.create = cb_ib_voqs_iSLIP_create;
+    cycle_switch.free = cb_ib_voqs_iSLIP_free;
     cycle_switch.register_host = NULL;
     cycle_switch.deregister_host = NULL;
     cycle_switch.tick = NULL;
