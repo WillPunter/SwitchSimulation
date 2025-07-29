@@ -19,16 +19,22 @@ hash_table:
 	@echo Building hash table tests...
 	$(CC) ./data_structures/test_hash_table.c ./../src/data_structures/hash_table.c $(INCLUDE) -o ./data_structures/test_hash_table
 
-build: demo heap hash_table
+queue:
+	@echo Building queue tests...
+	$(CC) ./data_structures/test_queue.c ./../src/data_structures/queue.c $(INCLUDE) -o ./data_structures/test_queue
+
+build: demo heap hash_table queue
 
 test: build
 	@echo Running all tests...
 	./demo
 	./data_structures/test_heap
 	./data_structures/test_hash_table
+	./data_structures/test_queue
 
-check: build
+check: test
 	@echo Running memory checks...
 	valgrind ./demo
 	valgrind ./data_structures/test_heap
 	valgrind ./data_structures/test_hash_table
+	valgrind ./data_structures/test_queue

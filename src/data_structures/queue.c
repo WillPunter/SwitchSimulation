@@ -1,9 +1,9 @@
 /* queue.c */
 
 #include "queue.h"
-#include "heap.h"
 #include <assert.h>
 #include <stddef.h>
+#include <malloc.h>
 
 struct queue {
     void **elems;
@@ -30,6 +30,7 @@ queue_t queue_create(free_func_t free_elem) {
     queue->tail = 0;
     queue->size = 0;
     queue->capacity = DEFAULT_CAPACITY;
+    queue->free_elem = free_elem;
 
     queue->elems = (void **) malloc(sizeof(void *) * queue->capacity);
     assert(queue->elems);

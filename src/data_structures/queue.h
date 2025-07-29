@@ -2,6 +2,8 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
+#include "heap.h"
+
 struct queue;
 typedef struct queue *queue_t;
 

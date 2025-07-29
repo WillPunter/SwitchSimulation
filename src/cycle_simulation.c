@@ -12,9 +12,28 @@
 
 /*  Define duration of a time slot in terms of numbers of cycles - this allows
     flexibility even if it is unlikely to change from 1. */
+#include "./network_switch/implementations/cb_ib_voqs_iSLIP.h"
+
 #define TIME_SLOT 1
+#define NUM_PORTS 8
 
-/*  */
+/*  Packet format - */
+
+/*  Create custom address format. */
+
 int main(int argc, char *argv[]) {
+    /*  Get switch interface implementaiton/ */
+    i_cycle_sim_switch_t network_switch_desc = cb_ib_voqs_iSLIP_cycle_switch();
 
+    void *network_switch = network_switch_desc.create(NUM_PORTS);
+
+    /* Register hosts. */
+
+    int running = 1;
+
+    while (running) {
+        network_switch_desc.tick();
+    };
+
+    network_switch_desc.free(network_switch);
 };
